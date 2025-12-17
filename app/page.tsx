@@ -169,7 +169,7 @@ export default function Home() {
                   src="/me.png"
                   alt="Andres Ortiz"
                   fill
-                  className="object-cover object-center grayscale hover:grayscale-0 transition-all duration-700 brightness-110"
+                  className="object-cover object-center profile-image"
                   priority
                 />
               </div>

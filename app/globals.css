@@ -13,16 +13,31 @@
   --font-mono: 'Space Grotesk', monospace;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: #050505;
   color: var(--foreground);
   font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
 }
 
 /* Texto con stroke - efecto outline */
 .italic-stroke {
   -webkit-text-stroke: 2px rgba(255, 255, 255, 0.9);
   color: transparent;
+}
+
+/* Imagen de perfil con filtro grayscale */
+.profile-image {
+  filter: grayscale(100%) brightness(1.1);
+  transition: filter 0.7s ease;
+}
+
+.profile-image:hover {
+  filter: grayscale(0%) brightness(1);
 }
 
 /* Scrollbar personalizado */
