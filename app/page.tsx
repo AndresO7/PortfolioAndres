@@ -1,65 +1,550 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import {
+  ArrowUpRight,
+  Github,
+  Linkedin,
+  ShieldAlert,
+  ExternalLink,
+  Trophy,
+} from "lucide-react";
+
+import { ScrambleText } from "./components/ScrambleText";
+import { ProfessionalLoader } from "./components/ProfessionalLoader";
+import { Marquee } from "./components/Marquee";
+import { SectionTitle } from "./components/SectionTitle";
 
 export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
+  const projects = [
+    {
+      id: "01",
+      title: "KODA",
+      role: "AI Agentic Architect",
+      desc: "Implementación multi-agente con LangGraph para la autonomía de flujos DevOps.",
+      tags: ["LangGraph", "A2A Protocol", "MCP"],
+    },
+    {
+      id: "02",
+      title: "CAG Engine",
+      role: "Lead AI Researcher",
+      desc: "Investigación en Cache-Augmented Generation para optimización masiva de tokens.",
+      tags: ["Google Gemini", "RAG/CAG", "Vector DB"],
+    },
+    {
+      id: "03",
+      title: "Cloud Bot",
+      role: "Backend Infrastructure",
+      desc: "Automatización de despliegue en AWS mediante procesamiento de lenguaje natural.",
+      tags: ["AWS Cloud", "Go", "Kafka"],
+    },
+  ];
+
+  const publications = [
+    {
+      year: "2024",
+      title: "IA Generativa: Una Nueva Frontera en la Automatización DevOps",
+      context: "Investigación Publicada / ESPE",
+    },
+    {
+      year: "2023",
+      title: "Generación de Código desde Interfaces Visuales mediante LLMs",
+      context: "Paper Aceptado / Arquitectura Software",
+    },
+  ];
+
+  const awards = [
+    {
+      title: "GitHub Campus Expert",
+      org: "GitHub Education",
+      year: "2023",
+      icon: <Trophy />,
+    },
+    {
+      title: "Hackathon Winner",
+      org: "ESPE / Future Devs",
+      year: "2022",
+      icon: <Trophy />,
+    },
+    {
+      title: "Math Excellence",
+      org: "Pierre Fermat",
+      year: "2019",
+      icon: <Trophy />,
+    },
+  ];
+
+  const techStack = [
+    "AWS Cloud",
+    "LangChain",
+    "Next.js",
+    "Go Language",
+    "Python AI",
+    "Kafka",
+    "PostgreSQL",
+    "React Native",
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="bg-[#050505] text-white selection:bg-red-600 selection:text-white font-sans overflow-x-hidden">
+      <AnimatePresence mode="wait">
+        {loading && (
+          <ProfessionalLoader onComplete={() => setLoading(false)} />
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-[3px] bg-red-600 z-[90] origin-left shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+        style={{ scaleX }}
+      />
+
+      {/* Navbar */}
+      {!loading && (
+        <motion.nav
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="fixed top-0 w-full p-10 flex justify-between items-center z-50 mix-blend-difference"
+        >
+          <span className="font-black tracking-tighter text-3xl font-mono text-red-600 italic">
+            AO
+          </span>
+          <div className="hidden md:flex gap-16 text-[10px] uppercase tracking-[0.5em] font-bold opacity-60 hover:opacity-100 transition-opacity">
+            <a href="#work" className="hover:text-red-600">
+              Portafolio
+            </a>
+            <a href="#research" className="hover:text-red-600">
+              Investigación
+            </a>
+            <a href="#about" className="hover:text-red-600">
+              Sistema
+            </a>
+            <a href="#contact" className="hover:text-red-600">
+              Terminal
+            </a>
+          </div>
+        </motion.nav>
+      )}
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(220,38,38,0.05)_0%,transparent_50%)]" />
+
+        {/* Foto de perfil */}
+        {!loading && (
+          <motion.div
+            initial={{ opacity: 0, x: 100, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 1.4, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute right-[5%] xl:right-[10%] top-1/2 -translate-y-1/2 hidden lg:block z-10"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="relative">
+              {/* Efecto de borde animado */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="absolute -inset-4 border border-dashed border-red-600/30 rounded-full"
+              />
+              
+              {/* Marco decorativo */}
+              <div className="absolute -inset-2 bg-gradient-to-br from-red-600/20 via-transparent to-red-600/10 rounded-2xl" />
+              <div className="absolute -inset-[1px] bg-gradient-to-br from-red-600/50 via-transparent to-red-600/30 rounded-2xl" />
+              
+              {/* Contenedor de la imagen */}
+              <div className="relative w-[320px] h-[400px] xl:w-[380px] xl:h-[480px] overflow-hidden rounded-2xl">
+                {/* Overlay de gradiente más sutil */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10" />
+                
+                <Image
+                  src="/me.png"
+                  alt="Andres Ortiz"
+                  fill
+                  className="object-cover object-center grayscale hover:grayscale-0 transition-all duration-700 brightness-110"
+                  priority
+                />
+              </div>
+              
+              {/* Elementos decorativos */}
+              <div className="absolute -bottom-6 -left-6 w-12 h-12 border border-red-600/40 rounded-sm" />
+              <div className="absolute -top-6 -right-6 w-8 h-8 bg-red-600/20 rounded-full" />
+              
+              {/* Etiqueta de estado */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2 }}
+                className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 border border-red-600/30 rounded-sm backdrop-blur-sm"
+              >
+                <span className="text-[9px] uppercase tracking-[0.4em] text-red-500 font-black">
+                  Available_For_Work
+                </span>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="max-w-7xl w-full relative z-20 lg:max-w-[55%] lg:mr-auto">
+          {!loading && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.2, delayChildren: 0.6 },
+                },
+              }}
+            >
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 },
+                }}
+                className="inline-flex items-center gap-3 px-4 py-1 border border-red-900/30 rounded-sm mb-12 bg-red-950/10"
+              >
+                <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_#dc2626]" />
+                <span className="text-[10px] uppercase tracking-[0.4em] text-red-500/80 font-black italic">
+                  System_User: Andres_Ortiz
+                </span>
+              </motion.div>
+
+              <motion.h1
+                variants={{
+                  hidden: { opacity: 0, y: 60, filter: "blur(10px)" },
+                  visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+                }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                className="text-[13vw] lg:text-[11vw] font-black leading-[0.8] tracking-[-0.05em] uppercase mb-16"
+              >
+                <ScrambleText text="ARQUITECTO" delay={1400} /> <br />
+                <span className="text-transparent italic-stroke opacity-90 block mt-4">
+                  <ScrambleText text="DIGITAL" delay={2000} />
+                </span>
+              </motion.h1>
+
+              <div className="grid md:grid-cols-2 gap-20 items-end">
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="space-y-8"
+                >
+                  <p className="text-2xl md:text-3xl text-white/40 leading-none font-light tracking-tighter max-w-xl">
+                    Ingeniería de{" "}
+                    <span className="text-white">sistemas agénticos</span> y
+                    despliegue de{" "}
+                    <span className="text-red-600 italic font-medium tracking-normal">
+                      IA Generativa
+                    </span>
+                    .
+                  </p>
+                  <div className="flex gap-10 items-center text-red-600 opacity-60">
+                    <div className="h-[1px] w-24 bg-red-600" />
+                    <span className="text-[10px] uppercase tracking-[0.5em] font-black italic">
+                      Next-Gen Architecture
+                    </span>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, x: 30 },
+                    visible: { opacity: 1, x: 0 },
+                  }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="flex flex-col items-start md:items-end gap-6 border-l md:border-l-0 md:border-r border-red-900/20 pl-8 md:pl-0 md:pr-8"
+                >
+                  <div className="flex gap-10">
+                    <a
+                      href="#"
+                      className="hover:text-red-600 transition-all scale-125"
+                    >
+                      <Linkedin size={22} />
+                    </a>
+                    <a
+                      href="#"
+                      className="hover:text-red-600 transition-all scale-125"
+                    >
+                      <Github size={22} />
+                    </a>
+                  </div>
+                  <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-mono">
+                    QUITO_EC // OPS_CENTER
+                  </p>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
         </div>
-      </main>
+      </section>
+
+      {/* About Section */}
+      <section
+        id="about"
+        className="py-48 px-6 bg-white text-black rounded-[3vw] md:rounded-[5vw] mx-2 md:mx-6"
+      >
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-32 items-start">
+          <div className="sticky top-40">
+            <SectionTitle subtitle="Core Logic">
+              Filosofía de <br /> Diseño
+            </SectionTitle>
+            <p className="text-3xl font-light leading-none text-black/40 mb-12">
+              Transformando la complejidad técnica en{" "}
+              <span className="font-bold text-black uppercase tracking-tighter italic">
+                motores de eficiencia
+              </span>
+              .
+            </p>
+            <div className="grid grid-cols-2 gap-12 pt-12 border-t border-black/10">
+              <div>
+                <h4 className="text-5xl font-black mb-2 tracking-tighter">
+                  50%
+                </h4>
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-40 leading-none">
+                  Aumento en Velocidad DevOps
+                </p>
+              </div>
+              <div>
+                <h4 className="text-5xl font-black mb-2 tracking-tighter">
+                  AWS
+                </h4>
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-40 leading-none">
+                  Cloud Native Solutions
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-20 py-20">
+            <div className="p-16 bg-black text-white rounded-3xl transform hover:rotate-1 transition-transform duration-700 shadow-2xl">
+              <ShieldAlert className="text-red-600 mb-10" size={48} />
+              <h4 className="text-4xl font-black mb-8 uppercase tracking-tighter leading-none">
+                Redefiniendo la IA
+              </h4>
+              <p className="text-xl opacity-60 leading-relaxed font-light italic">
+                &quot;Mi trabajo con Cache-Augmented Generation (CAG) rompe las
+                barreras del RAG tradicional, permitiendo una recuperación de
+                información instantánea y de ultra-bajo costo.&quot;
+              </p>
+            </div>
+            <p className="text-2xl leading-relaxed font-light text-black/80">
+              Como **GitHub Campus Expert**, lidero la vanguardia de la
+              ingeniería de software en Latinoamérica, fusionando la
+              investigación académica con la ejecución pragmática en la nube.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Work Section */}
+      <section id="work" className="py-48 px-6">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle subtitle="Operations">
+            Portafolio <br /> Estratégico
+          </SectionTitle>
+          <div className="space-y-4">
+            {projects.map((project, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="group relative flex flex-col md:flex-row items-center justify-between p-16 border border-white/5 hover:border-red-600/40 hover:bg-red-600/[0.02] transition-all duration-700 rounded-2xl overflow-hidden"
+              >
+                <div className="flex items-center gap-16 relative z-10">
+                  <span className="text-xs font-mono text-red-600 font-bold tracking-[0.3em]">
+                    MOD_0{index + 1}
+                  </span>
+                  <h3 className="text-5xl md:text-8xl font-black tracking-tighter uppercase transition-all group-hover:italic">
+                    {project.title}
+                  </h3>
+                </div>
+                <div className="max-w-md mt-10 md:mt-0 md:text-right relative z-10">
+                  <p className="text-white/40 text-xl mb-8 font-light italic leading-tight">
+                    // {project.desc}
+                  </p>
+                  <div className="flex gap-3 justify-end flex-wrap">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] px-4 py-2 bg-white/5 rounded-full border border-white/10 uppercase tracking-widest font-bold text-white/30 group-hover:border-red-600 group-hover:text-red-600 transition-colors"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="absolute top-10 right-10 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                  <ArrowUpRight size={40} className="text-red-600" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Research & Publications */}
+      <section id="research" className="py-48 px-6 bg-red-600 text-white">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle subtitle="Intelligence">
+            Investigación <br /> Científica
+          </SectionTitle>
+          <div className="grid md:grid-cols-2 gap-8">
+            {publications.map((pub, i) => (
+              <div
+                key={i}
+                className="group p-16 border-2 border-white/20 hover:bg-white hover:text-black transition-all duration-700 rounded-sm"
+              >
+                <div className="flex justify-between items-start mb-20">
+                  <span className="text-6xl font-black italic opacity-30 group-hover:opacity-100">
+                    {pub.year}
+                  </span>
+                  <ExternalLink
+                    size={28}
+                    className="opacity-20 group-hover:opacity-100"
+                  />
+                </div>
+                <h4 className="text-3xl md:text-4xl font-black leading-tight mb-8 uppercase tracking-tighter italic">
+                  &quot;{pub.title}&quot;
+                </h4>
+                <p className="text-[10px] uppercase tracking-[0.6em] font-black opacity-50">
+                  {pub.context}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Recognition Section */}
+      <section className="py-48 px-6 border-b border-white/5">
+        <div className="max-w-7xl mx-auto">
+          <SectionTitle subtitle="Validation">Méritos</SectionTitle>
+          <div className="grid md:grid-cols-3 gap-1">
+            {awards.map((award, i) => (
+              <div
+                key={i}
+                className="p-16 border border-white/5 hover:border-red-600 transition-all group relative overflow-hidden bg-white/[0.01]"
+              >
+                <div className="mb-12 text-red-600 transform group-hover:scale-110 transition-transform">
+                  {award.icon}
+                </div>
+                <h4 className="text-3xl font-black mb-4 uppercase tracking-tighter leading-none">
+                  {award.title}
+                </h4>
+                <p className="text-white/30 uppercase text-[10px] tracking-[0.4em] font-black">
+                  {award.org} // {award.year}
+                </p>
+                <div className="absolute -bottom-10 -right-10 text-white/[0.02] text-9xl font-black italic group-hover:text-red-600/5 transition-colors">
+                  {i + 1}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Marquee */}
+      <section className="py-12">
+        <Marquee items={techStack} />
+      </section>
+
+      {/* Footer / CTA */}
+      <footer
+        id="contact"
+        className="py-64 px-6 relative bg-white text-black overflow-hidden rounded-t-[5vw]"
+      >
+        <div className="max-w-5xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-7xl md:text-[11vw] font-black tracking-tighter uppercase mb-20 leading-[0.8]">
+              <ScrambleText text="CREAMOS EL FUTURO" delay={300} />
+            </h2>
+
+            <div className="flex flex-col md:flex-row items-center justify-center gap-12">
+              <a
+                href="mailto:andres.ortiz.h.2001@gmail.com"
+                className="group relative inline-flex items-center gap-10 bg-black text-white px-24 py-12 rounded-sm text-3xl font-black hover:bg-red-600 transition-all uppercase tracking-tighter"
+              >
+                <span>Ejecutar Contacto</span>
+                <ArrowUpRight
+                  className="group-hover:rotate-45 transition-transform"
+                  size={32}
+                />
+              </a>
+              <div className="text-left font-mono">
+                <p className="text-[10px] font-bold uppercase tracking-[0.4em] opacity-30 leading-none mb-2">
+                  Network_Status
+                </p>
+                <p className="text-2xl font-black uppercase italic tracking-tighter">
+                  Handshake_Open
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-48 grid md:grid-cols-3 gap-24 pt-20 border-t border-black/10 text-left">
+              <div className="space-y-4">
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-30">
+                  // Location
+                </p>
+                <p className="text-2xl font-bold uppercase italic tracking-tighter">
+                  Quito, Ecuador
+                </p>
+              </div>
+              <div className="space-y-4">
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-30">
+                  // Digital_Identity
+                </p>
+                <div className="flex gap-12">
+                  <Linkedin
+                    size={32}
+                    className="hover:text-red-600 cursor-pointer transition-colors"
+                  />
+                  <Github
+                    size={32}
+                    className="hover:text-red-600 cursor-pointer transition-colors"
+                  />
+                </div>
+              </div>
+              <div className="space-y-4 md:text-right">
+                <p className="text-[10px] uppercase tracking-widest font-black opacity-30">
+                  // System_Build
+                </p>
+                <p className="text-sm font-mono opacity-40 uppercase">
+                  v4.0.0_STABLE_AI
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-red-600" />
+      </footer>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .italic-stroke { -webkit-text-stroke: 1px rgba(255,255,255,1); color: transparent; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700;900&display=swap');
+        body { font-family: 'Space Grotesk', sans-serif; background: #050505; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
+      `}} />
     </div>
   );
 }
