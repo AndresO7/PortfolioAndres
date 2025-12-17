@@ -140,55 +140,27 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(220,38,38,0.05)_0%,transparent_50%)]" />
 
-        {/* Foto de perfil */}
+        {/* Foto de perfil - fusionada con el fondo */}
         {!loading && (
           <motion.div
-            initial={{ opacity: 0, x: 100, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.4, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute right-[5%] xl:right-[10%] top-1/2 -translate-y-1/2 hidden lg:block z-10"
+            className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block z-0"
           >
-            <div className="relative">
-              {/* Efecto de borde animado */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-4 border border-dashed border-red-600/30 rounded-full"
+            <div className="relative w-[600px] h-[750px] xl:w-[700px] xl:h-[850px]">
+              {/* Gradientes para fusionar con el fondo */}
+              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[#050505] z-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/30 z-10 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/80 via-transparent to-transparent z-10 pointer-events-none" />
+              
+              <Image
+                src="/me.png"
+                alt="Andres Ortiz"
+                fill
+                className="object-cover object-center"
+                priority
               />
-              
-              {/* Marco decorativo */}
-              <div className="absolute -inset-2 bg-gradient-to-br from-red-600/20 via-transparent to-red-600/10 rounded-2xl" />
-              <div className="absolute -inset-[1px] bg-gradient-to-br from-red-600/50 via-transparent to-red-600/30 rounded-2xl" />
-              
-              {/* Contenedor de la imagen */}
-              <div className="relative w-[320px] h-[400px] xl:w-[380px] xl:h-[480px] overflow-hidden rounded-2xl">
-                {/* Overlay de gradiente más sutil */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10" />
-                
-                <Image
-                  src="/me.png"
-                  alt="Andres Ortiz"
-                  fill
-                  className="object-cover object-center profile-image"
-                  priority
-                />
-              </div>
-              
-              {/* Elementos decorativos */}
-              <div className="absolute -bottom-6 -left-6 w-12 h-12 border border-red-600/40 rounded-sm" />
-              <div className="absolute -top-6 -right-6 w-8 h-8 bg-red-600/20 rounded-full" />
-              
-              {/* Etiqueta de estado */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 2 }}
-                className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/80 border border-red-600/30 rounded-sm backdrop-blur-sm"
-              >
-                <span className="text-[9px] uppercase tracking-[0.4em] text-red-500 font-black">
-                  Available_For_Work
-                </span>
-              </motion.div>
             </div>
           </motion.div>
         )}
