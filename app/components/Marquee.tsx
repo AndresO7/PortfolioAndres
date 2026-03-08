@@ -6,7 +6,7 @@ interface MarqueeProps {
 }
 
 export const Marquee = ({ items, direction = "left" }: MarqueeProps) => (
-  <div className="relative flex overflow-x-hidden border-y border-red-900/20 py-24 bg-red-950/5 backdrop-blur-sm">
+  <div className="relative flex overflow-x-hidden border-y border-[#39ff14]/20 py-24 bg-[#39ff14]/5 backdrop-blur-sm">
     <div
       className={`flex whitespace-nowrap ${
         direction === "left" ? "animate-marquee" : "animate-marquee-reverse"
@@ -15,7 +15,7 @@ export const Marquee = ({ items, direction = "left" }: MarqueeProps) => (
       {[...items, ...items].map((item, i) => (
         <span
           key={i}
-          className="mx-16 text-8xl md:text-[11vw] font-black uppercase tracking-tighter text-white transition-all duration-700 hover:text-red-600 inline-block cursor-default"
+          className="mx-16 text-8xl md:text-[11vw] font-black uppercase tracking-tighter text-white transition-all duration-700 hover:text-[#39ff14] inline-block cursor-default"
         >
           {item}
         </span>

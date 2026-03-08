@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence, useScroll, useSpring, useTransform, MotionValue, useMotionValueEvent } from "framer-motion";
 import {
   ArrowUpRight,
   Github,
@@ -16,15 +16,68 @@ import { ScrambleText } from "./components/ScrambleText";
 import { ProfessionalLoader } from "./components/ProfessionalLoader";
 import { Marquee } from "./components/Marquee";
 import { SectionTitle } from "./components/SectionTitle";
+import { preloadStatueModel } from "./components/StatueModel";
+
+const StatueModel = dynamic(
+  () => import("./components/StatueModel").then((mod) => ({ default: mod.StatueModel })),
+  { ssr: false }
+);
+
+function StatueModelWithMotion({ 
+  cameraZMotion, 
+  cameraYMotion, 
+  centerXMotion,
+  rotationYMotion
+}: { 
+  cameraZMotion: MotionValue<number>; 
+  cameraYMotion: MotionValue<number>; 
+  centerXMotion: MotionValue<number>;
+  rotationYMotion: MotionValue<number>;
+}) {
+  const [cameraZ, setCameraZ] = useState(3);
+  const [cameraY, setCameraY] = useState(0.5);
+  const [centerX, setCenterX] = useState(0.3);
+  const [rotationY, setRotationY] = useState(0);
+
+  useMotionValueEvent(cameraZMotion, "change", (latest) => setCameraZ(latest));
+  useMotionValueEvent(cameraYMotion, "change", (latest) => setCameraY(latest));
+  useMotionValueEvent(centerXMotion, "change", (latest) => setCenterX(latest));
+  useMotionValueEvent(rotationYMotion, "change", (latest) => setRotationY(latest));
+
+  return <StatueModel cameraZ={cameraZ} cameraY={cameraY} centerX={centerX} rotationY={rotationY} />;
+}
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  const [modelProgress, setModelProgress] = useState(0);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
+
+  useEffect(() => {
+    preloadStatueModel((progress) => {
+      setModelProgress(progress);
+    });
+  }, []);
+
+  const statueTransitionRef = useRef(null);
+  const [isStatueFixed, setIsStatueFixed] = useState(true);
+  const { scrollYProgress: statueProgress } = useScroll({
+    target: statueTransitionRef,
+    offset: ["start end", "end end"]
+  });
+
+  useMotionValueEvent(statueProgress, "change", (latest) => {
+    setIsStatueFixed(latest < 0.99);
+  });
+
+  const cameraZ = useTransform(statueProgress, [0, 1], [3, 17]);
+  const cameraY = useTransform(statueProgress, [0, 1], [0.5, 0]);
+  const centerX = useTransform(statueProgress, [0, 1], [0.3, -2.1]);
+  const rotationY = useTransform(statueProgress, [0, 1], [0, Math.PI * 2]);
 
   const projects = [
     {
@@ -96,15 +149,18 @@ export default function Home() {
   ];
 
   return (
-    <div className="bg-[#050505] text-white selection:bg-red-600 selection:text-white font-sans overflow-x-hidden">
+    <div className="bg-[#050505] text-white selection:bg-[#39ff14] selection:text-black font-sans overflow-x-hidden">
       <AnimatePresence mode="wait">
         {loading && (
-          <ProfessionalLoader onComplete={() => setLoading(false)} />
+          <ProfessionalLoader 
+            onComplete={() => setLoading(false)} 
+            modelProgress={modelProgress}
+          />
         )}
       </AnimatePresence>
 
       <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-red-600 z-[90] origin-left shadow-[0_0_10px_rgba(220,38,38,0.5)]"
+        className="fixed top-0 left-0 right-0 h-[3px] bg-[#39ff14] z-[90] origin-left shadow-[0_0_10px_rgba(57,255,20,0.5)]"
         style={{ scaleX }}
       />
 
@@ -116,20 +172,20 @@ export default function Home() {
           transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="fixed top-0 w-full p-10 flex justify-between items-center z-50 mix-blend-difference"
         >
-          <span className="font-black tracking-tighter text-3xl font-mono text-red-600 italic">
+          <span className="font-black tracking-tighter text-3xl font-mono text-[#39ff14] italic">
             AO
           </span>
           <div className="hidden md:flex gap-16 text-[10px] uppercase tracking-[0.5em] font-bold opacity-60 hover:opacity-100 transition-opacity">
-            <a href="#work" className="hover:text-red-600">
+            <a href="#work" className="hover:text-[#39ff14]">
               Portafolio
             </a>
-            <a href="#research" className="hover:text-red-600">
+            <a href="#research" className="hover:text-[#39ff14]">
               Investigación
             </a>
-            <a href="#about" className="hover:text-red-600">
+            <a href="#about" className="hover:text-[#39ff14]">
               Sistema
             </a>
-            <a href="#contact" className="hover:text-red-600">
+            <a href="#contact" className="hover:text-[#39ff14]">
               Terminal
             </a>
           </div>
@@ -137,137 +193,157 @@ export default function Home() {
       )}
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(220,38,38,0.05)_0%,transparent_50%)]" />
+      <div>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
+          {/* Animated grid background */}
+          <div className="absolute inset-0 overflow-hidden">
+            <motion.div 
+              className="absolute inset-0"
+              animate={{ backgroundPosition: ["0px 0px", "60px 60px"] }}
+              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px)
+                `,
+                backgroundSize: '60px 60px',
+              }}
+            />
+          </div>
+          
+          {/* Radial gradient overlay */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(57,255,20,0.08)_0%,transparent_50%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_70%,rgba(57,255,20,0.05)_0%,transparent_40%)]" />
 
-        {/* Foto de perfil - fusionada con el fondo */}
+          <div className="max-w-7xl w-full relative z-20 lg:max-w-[55%] lg:mr-auto">
+            {!loading && (
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.2, delayChildren: 0.6 },
+                  },
+                }}
+              >
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    visible: { opacity: 1, x: 0 },
+                  }}
+                  className="inline-flex items-center gap-3 px-4 py-1 border border-[#39ff14]/30 rounded-sm mb-12 bg-[#39ff14]/10"
+                >
+                  <div className="w-2 h-2 bg-[#39ff14] rounded-full animate-pulse shadow-[0_0_10px_#39ff14]" />
+                  <span className="text-[10px] uppercase tracking-[0.4em] text-[#39ff14]/80 font-black italic">
+                    System_User: Andres_Ortiz
+                  </span>
+                </motion.div>
+
+                <motion.h1
+                  variants={{
+                    hidden: { opacity: 0, y: 60, filter: "blur(10px)" },
+                    visible: { opacity: 1, y: 0, filter: "blur(0px)" },
+                  }}
+                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-[13vw] lg:text-[11vw] font-black leading-[0.8] tracking-[-0.05em] uppercase mb-16"
+                >
+                  <ScrambleText text="ARQUITECTO" delay={1400} /> <br />
+                  <span className="text-transparent italic-stroke opacity-90 block mt-4">
+                    <ScrambleText text="DIGITAL" delay={2000} />
+                  </span>
+                </motion.h1>
+
+                <div className="grid md:grid-cols-2 gap-20 items-end">
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="space-y-8"
+                  >
+                    <p className="text-2xl md:text-3xl text-white/40 leading-none font-light tracking-tighter max-w-xl">
+                      Ingeniería de{" "}
+                      <span className="text-white">sistemas agénticos</span> y
+                      despliegue de{" "}
+                      <span className="text-[#39ff14] italic font-medium tracking-normal">
+                        IA Generativa
+                      </span>
+                      .
+                    </p>
+                    <div className="flex gap-10 items-center text-[#39ff14] opacity-60">
+                      <div className="h-[1px] w-24 bg-[#39ff14]" />
+                      <span className="text-[10px] uppercase tracking-[0.5em] font-black italic">
+                        Next-Gen Architecture
+                      </span>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, x: 30 },
+                      visible: { opacity: 1, x: 0 },
+                    }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="flex flex-col items-start md:items-end gap-6 border-l md:border-l-0 md:border-r border-[#39ff14]/20 pl-8 md:pl-0 md:pr-8"
+                  >
+                    <div className="flex gap-10">
+                      <a
+                        href="#"
+                        className="hover:text-[#39ff14] transition-all scale-125"
+                      >
+                        <Linkedin size={22} />
+                      </a>
+                      <a
+                        href="#"
+                        className="hover:text-[#39ff14] transition-all scale-125"
+                      >
+                        <Github size={22} />
+                      </a>
+                    </div>
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-mono">
+                      QUITO_EC // OPS_CENTER
+                    </p>
+                  </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* About Section */}
+      <section
+        id="about"
+        className="relative py-48 px-6 bg-white text-black rounded-[3vw] md:rounded-[5vw] mx-2 md:mx-6 overflow-hidden"
+        ref={statueTransitionRef}
+      >
+        {/* Modelo 3D de estatua */}
         {!loading && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 1.4, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 hidden lg:block z-0"
+            className={`hidden lg:flex items-center justify-center z-40 w-[50%] pointer-events-none ${
+              isStatueFixed 
+                ? "fixed right-0 top-0 bottom-0" 
+                : "absolute right-0 bottom-0 h-screen"
+            }`}
           >
-            <div className="relative w-[600px] h-[750px] xl:w-[700px] xl:h-[850px]">
-              {/* Gradientes para fusionar con el fondo */}
-              <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-[#050505] z-10 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/30 z-10 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#050505]/80 via-transparent to-transparent z-10 pointer-events-none" />
-              
-              <Image
-                src="/me.png"
-                alt="Andres Ortiz"
-                fill
-                className="object-cover object-center"
-                priority
+            <div className="relative w-full h-full">
+              <StatueModelWithMotion 
+                cameraZMotion={cameraZ} 
+                cameraYMotion={cameraY} 
+                centerXMotion={centerX}
+                rotationYMotion={rotationY}
               />
             </div>
           </motion.div>
         )}
 
-        <div className="max-w-7xl w-full relative z-20 lg:max-w-[55%] lg:mr-auto">
-          {!loading && (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.2, delayChildren: 0.6 },
-                },
-              }}
-            >
-              <motion.div
-                variants={{
-                  hidden: { opacity: 0, x: -20 },
-                  visible: { opacity: 1, x: 0 },
-                }}
-                className="inline-flex items-center gap-3 px-4 py-1 border border-red-900/30 rounded-sm mb-12 bg-red-950/10"
-              >
-                <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse shadow-[0_0_10px_#dc2626]" />
-                <span className="text-[10px] uppercase tracking-[0.4em] text-red-500/80 font-black italic">
-                  System_User: Andres_Ortiz
-                </span>
-              </motion.div>
-
-              <motion.h1
-                variants={{
-                  hidden: { opacity: 0, y: 60, filter: "blur(10px)" },
-                  visible: { opacity: 1, y: 0, filter: "blur(0px)" },
-                }}
-                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                className="text-[13vw] lg:text-[11vw] font-black leading-[0.8] tracking-[-0.05em] uppercase mb-16"
-              >
-                <ScrambleText text="ARQUITECTO" delay={1400} /> <br />
-                <span className="text-transparent italic-stroke opacity-90 block mt-4">
-                  <ScrambleText text="DIGITAL" delay={2000} />
-                </span>
-              </motion.h1>
-
-              <div className="grid md:grid-cols-2 gap-20 items-end">
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0 },
-                  }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className="space-y-8"
-                >
-                  <p className="text-2xl md:text-3xl text-white/40 leading-none font-light tracking-tighter max-w-xl">
-                    Ingeniería de{" "}
-                    <span className="text-white">sistemas agénticos</span> y
-                    despliegue de{" "}
-                    <span className="text-red-600 italic font-medium tracking-normal">
-                      IA Generativa
-                    </span>
-                    .
-                  </p>
-                  <div className="flex gap-10 items-center text-red-600 opacity-60">
-                    <div className="h-[1px] w-24 bg-red-600" />
-                    <span className="text-[10px] uppercase tracking-[0.5em] font-black italic">
-                      Next-Gen Architecture
-                    </span>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, x: 30 },
-                    visible: { opacity: 1, x: 0 },
-                  }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className="flex flex-col items-start md:items-end gap-6 border-l md:border-l-0 md:border-r border-red-900/20 pl-8 md:pl-0 md:pr-8"
-                >
-                  <div className="flex gap-10">
-                    <a
-                      href="#"
-                      className="hover:text-red-600 transition-all scale-125"
-                    >
-                      <Linkedin size={22} />
-                    </a>
-                    <a
-                      href="#"
-                      className="hover:text-red-600 transition-all scale-125"
-                    >
-                      <Github size={22} />
-                    </a>
-                  </div>
-                  <p className="text-[10px] uppercase tracking-[0.4em] text-white/20 font-mono">
-                    QUITO_EC // OPS_CENTER
-                  </p>
-                </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section
-        id="about"
-        className="py-48 px-6 bg-white text-black rounded-[3vw] md:rounded-[5vw] mx-2 md:mx-6"
-      >
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-32 items-start">
           <div className="sticky top-40">
             <SectionTitle subtitle="Core Logic">
@@ -301,7 +377,7 @@ export default function Home() {
           </div>
           <div className="space-y-20 py-20">
             <div className="p-16 bg-black text-white rounded-3xl transform hover:rotate-1 transition-transform duration-700 shadow-2xl">
-              <ShieldAlert className="text-red-600 mb-10" size={48} />
+              <ShieldAlert className="text-[#39ff14] mb-10" size={48} />
               <h4 className="text-4xl font-black mb-8 uppercase tracking-tighter leading-none">
                 Redefiniendo la IA
               </h4>
@@ -333,10 +409,10 @@ export default function Home() {
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="group relative flex flex-col md:flex-row items-center justify-between p-16 border border-white/5 hover:border-red-600/40 hover:bg-red-600/[0.02] transition-all duration-700 rounded-2xl overflow-hidden"
+                className="group relative flex flex-col md:flex-row items-center justify-between p-16 border border-white/5 hover:border-[#39ff14]/40 hover:bg-[#39ff14]/[0.02] transition-all duration-700 rounded-2xl overflow-hidden"
               >
                 <div className="flex items-center gap-16 relative z-10">
-                  <span className="text-xs font-mono text-red-600 font-bold tracking-[0.3em]">
+                  <span className="text-xs font-mono text-[#39ff14] font-bold tracking-[0.3em]">
                     MOD_0{index + 1}
                   </span>
                   <h3 className="text-5xl md:text-8xl font-black tracking-tighter uppercase transition-all group-hover:italic">
@@ -351,7 +427,7 @@ export default function Home() {
                     {project.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] px-4 py-2 bg-white/5 rounded-full border border-white/10 uppercase tracking-widest font-bold text-white/30 group-hover:border-red-600 group-hover:text-red-600 transition-colors"
+                        className="text-[10px] px-4 py-2 bg-white/5 rounded-full border border-white/10 uppercase tracking-widest font-bold text-white/30 group-hover:border-[#39ff14] group-hover:text-[#39ff14] transition-colors"
                       >
                         {tag}
                       </span>
@@ -359,7 +435,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="absolute top-10 right-10 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                  <ArrowUpRight size={40} className="text-red-600" />
+                  <ArrowUpRight size={40} className="text-[#39ff14]" />
                 </div>
               </motion.div>
             ))}
@@ -368,7 +444,7 @@ export default function Home() {
       </section>
 
       {/* Research & Publications */}
-      <section id="research" className="py-48 px-6 bg-red-600 text-white">
+      <section id="research" className="py-48 px-6 bg-[#39ff14] text-black">
         <div className="max-w-7xl mx-auto">
           <SectionTitle subtitle="Intelligence">
             Investigación <br /> Científica
@@ -408,9 +484,9 @@ export default function Home() {
             {awards.map((award, i) => (
               <div
                 key={i}
-                className="p-16 border border-white/5 hover:border-red-600 transition-all group relative overflow-hidden bg-white/[0.01]"
+                className="p-16 border border-white/5 hover:border-[#39ff14] transition-all group relative overflow-hidden bg-white/[0.01]"
               >
-                <div className="mb-12 text-red-600 transform group-hover:scale-110 transition-transform">
+                <div className="mb-12 text-[#39ff14] transform group-hover:scale-110 transition-transform">
                   {award.icon}
                 </div>
                 <h4 className="text-3xl font-black mb-4 uppercase tracking-tighter leading-none">
@@ -419,7 +495,7 @@ export default function Home() {
                 <p className="text-white/30 uppercase text-[10px] tracking-[0.4em] font-black">
                   {award.org} // {award.year}
                 </p>
-                <div className="absolute -bottom-10 -right-10 text-white/[0.02] text-9xl font-black italic group-hover:text-red-600/5 transition-colors">
+                <div className="absolute -bottom-10 -right-10 text-white/[0.02] text-9xl font-black italic group-hover:text-[#39ff14]/5 transition-colors">
                   {i + 1}
                 </div>
               </div>
@@ -451,7 +527,7 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-center justify-center gap-12">
               <a
                 href="mailto:andres.ortiz.h.2001@gmail.com"
-                className="group relative inline-flex items-center gap-10 bg-black text-white px-24 py-12 rounded-sm text-3xl font-black hover:bg-red-600 transition-all uppercase tracking-tighter"
+                className="group relative inline-flex items-center gap-10 bg-black text-white px-24 py-12 rounded-sm text-3xl font-black hover:bg-[#39ff14] hover:text-black transition-all uppercase tracking-tighter"
               >
                 <span>Ejecutar Contacto</span>
                 <ArrowUpRight
@@ -485,11 +561,11 @@ export default function Home() {
                 <div className="flex gap-12">
                   <Linkedin
                     size={32}
-                    className="hover:text-red-600 cursor-pointer transition-colors"
+                    className="hover:text-[#39ff14] cursor-pointer transition-colors"
                   />
                   <Github
                     size={32}
-                    className="hover:text-red-600 cursor-pointer transition-colors"
+                    className="hover:text-[#39ff14] cursor-pointer transition-colors"
                   />
                 </div>
               </div>
@@ -506,7 +582,7 @@ export default function Home() {
         </div>
 
         {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-red-600" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-[#39ff14]" />
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `
@@ -515,7 +591,7 @@ export default function Home() {
         body { font-family: 'Space Grotesk', sans-serif; background: #050505; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #050505; }
-        ::-webkit-scrollbar-thumb { background: #dc2626; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #39ff14; border-radius: 10px; }
       `}} />
     </div>
   );

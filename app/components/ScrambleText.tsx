@@ -11,9 +11,13 @@ interface ScrambleTextProps {
 
 export const ScrambleText = ({ text, delay = 0 }: ScrambleTextProps) => {
   const [displayText, setDisplayText] = useState(text);
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$/%&*";
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
   const scramble = () => {
+    if (hasAnimated) return;
+    setHasAnimated(true);
+    
     let iteration = 0;
     const interval = setInterval(() => {
       setDisplayText(
@@ -35,9 +39,16 @@ export const ScrambleText = ({ text, delay = 0 }: ScrambleTextProps) => {
   return (
     <motion.span
       onViewportEnter={() => setTimeout(scramble, delay)}
-      className="font-mono"
+      className="relative inline-block"
     >
-      {displayText}
+      {/* Texto invisible que reserva el espacio */}
+      <span className="invisible" aria-hidden="true">
+        {text}
+      </span>
+      {/* Texto visible posicionado absolutamente */}
+      <span className="absolute inset-0 flex justify-center">
+        {displayText}
+      </span>
     </motion.span>
   );
 };

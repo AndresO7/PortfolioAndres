@@ -14,7 +14,7 @@ export const SectionTitle = ({ children, subtitle }: SectionTitleProps) => (
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="text-xs uppercase tracking-[0.7em] text-red-600 mb-6 font-mono font-black"
+      className="text-xs uppercase tracking-[0.7em] text-[#39ff14] mb-6 font-mono font-black"
     >
       // {subtitle}
     </motion.p>
