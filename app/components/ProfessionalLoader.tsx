@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 interface ProfessionalLoaderProps {
-  onComplete: () => void;
   modelProgress?: number;
+  modelReady?: boolean;
 }
 
-export const ProfessionalLoader = ({ onComplete, modelProgress = 0 }: ProfessionalLoaderProps) => {
+export const ProfessionalLoader = ({ modelProgress = 0, modelReady = false }: ProfessionalLoaderProps) => {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [statusText, setStatusText] = useState("BOOT_SEQUENCE");
@@ -55,11 +55,10 @@ export const ProfessionalLoader = ({ onComplete, modelProgress = 0 }: Profession
   }, [displayProgress]);
 
   useEffect(() => {
-    if (displayProgress >= 100 && !isUnlocked) {
-      setTimeout(() => setIsUnlocked(true), 800);
-      setTimeout(onComplete, 2200);
+    if (displayProgress >= 100 && modelReady && !isUnlocked) {
+      setTimeout(() => setIsUnlocked(true), 400);
     }
-  }, [displayProgress, isUnlocked, onComplete]);
+  }, [displayProgress, modelReady, isUnlocked]);
 
   return (
     <motion.div

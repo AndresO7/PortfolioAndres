@@ -27,12 +27,14 @@ function StatueModelWithMotion({
   cameraZMotion, 
   cameraYMotion, 
   centerXMotion,
-  rotationYMotion
+  rotationYMotion,
+  onLoaded
 }: { 
   cameraZMotion: MotionValue<number>; 
   cameraYMotion: MotionValue<number>; 
   centerXMotion: MotionValue<number>;
   rotationYMotion: MotionValue<number>;
+  onLoaded?: () => void;
 }) {
   const [cameraZ, setCameraZ] = useState(3);
   const [cameraY, setCameraY] = useState(0.5);
@@ -44,12 +46,13 @@ function StatueModelWithMotion({
   useMotionValueEvent(centerXMotion, "change", (latest) => setCenterX(latest));
   useMotionValueEvent(rotationYMotion, "change", (latest) => setRotationY(latest));
 
-  return <StatueModel cameraZ={cameraZ} cameraY={cameraY} centerX={centerX} rotationY={rotationY} />;
+  return <StatueModel cameraZ={cameraZ} cameraY={cameraY} centerX={centerX} rotationY={rotationY} onLoaded={onLoaded} />;
 }
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [modelProgress, setModelProgress] = useState(0);
+  const [modelReady, setModelReady] = useState(false);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -62,6 +65,32 @@ export default function Home() {
       setModelProgress(progress);
     });
   }, []);
+
+  const handleModelLoaded = () => {
+    setModelReady(true);
+  };
+
+  const handleLoaderComplete = () => {
+    if (modelReady) {
+      setLoading(false);
+    } else {
+      const checkReady = setInterval(() => {
+        if (modelReady) {
+          clearInterval(checkReady);
+          setLoading(false);
+        }
+      }, 100);
+    }
+  };
+
+  useEffect(() => {
+    if (modelReady && modelProgress >= 100) {
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [modelReady, modelProgress]);
 
   const statueTransitionRef = useRef(null);
   const [isStatueFixed, setIsStatueFixed] = useState(true);
@@ -153,8 +182,8 @@ export default function Home() {
       <AnimatePresence mode="wait">
         {loading && (
           <ProfessionalLoader 
-            onComplete={() => setLoading(false)} 
             modelProgress={modelProgress}
+            modelReady={modelReady}
           />
         )}
       </AnimatePresence>
@@ -321,28 +350,27 @@ export default function Home() {
         className="relative py-48 px-6 bg-white text-black rounded-[3vw] md:rounded-[5vw] mx-2 md:mx-6 overflow-hidden"
         ref={statueTransitionRef}
       >
-        {/* Modelo 3D de estatua */}
-        {!loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.4, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className={`hidden lg:flex items-center justify-center z-40 w-[50%] pointer-events-none ${
-              isStatueFixed 
-                ? "fixed right-0 top-0 bottom-0" 
-                : "absolute right-0 bottom-0 h-screen"
-            }`}
-          >
-            <div className="relative w-full h-full">
-              <StatueModelWithMotion 
-                cameraZMotion={cameraZ} 
-                cameraYMotion={cameraY} 
-                centerXMotion={centerX}
-                rotationYMotion={rotationY}
-              />
-            </div>
-          </motion.div>
-        )}
+        {/* Modelo 3D de estatua - se monta siempre para pre-renderizar */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: loading ? 0 : 1 }}
+          transition={{ duration: 1.4, delay: loading ? 0 : 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className={`hidden lg:flex items-center justify-center z-40 w-[50%] pointer-events-none ${
+            isStatueFixed 
+              ? "fixed right-0 top-0 bottom-0" 
+              : "absolute right-0 bottom-0 h-screen"
+          }`}
+        >
+          <div className="relative w-full h-full">
+            <StatueModelWithMotion 
+              cameraZMotion={cameraZ} 
+              cameraYMotion={cameraY} 
+              centerXMotion={centerX}
+              rotationYMotion={rotationY}
+              onLoaded={handleModelLoaded}
+            />
+          </div>
+        </motion.div>
 
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-32 items-start">
           <div className="sticky top-40">
