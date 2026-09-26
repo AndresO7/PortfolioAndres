@@ -5,6 +5,7 @@ import { contextTokens as contextSteps, WINDOW } from "../../lib/content";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { useLocale, useT } from "../../lib/i18n";
 import { easeOutExpo, range } from "../../lib/reel";
+import { sound } from "../../lib/sound";
 
 /** The bar track represents this many tokens, so the 200k window sits short of the edge. */
 const TRACK = 225_000;
@@ -80,7 +81,11 @@ export function Context() {
       if (countF.current) countF.current.textContent = fmt(firewall, numbersRef.current);
       const over = Math.max(0, direct - WINDOW);
       if (overflow.current) overflow.current.style.width = `${(over / TRACK) * 100}%`;
-      if (alarm.current) alarm.current.dataset.on = over > 0 ? "1" : "0";
+      if (alarm.current) {
+        const on = over > 0 ? "1" : "0";
+        if (on === "1" && alarm.current.dataset.on !== "1") sound.alarm();
+        alarm.current.dataset.on = on;
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "../lib/gsap";
 import { useT } from "../lib/i18n";
 import { signal, when } from "../lib/reel";
+import { sound } from "../lib/sound";
 
 /**
  * Scene 00: a film slate. Counts to 100 while the statue and fonts load,
@@ -44,8 +45,10 @@ export function Loader() {
     const finish = () => {
       tl = gsap.timeline({ onComplete: () => setDone(true) });
       tl.to(clapper.current, { rotate: 0, duration: 0.22, ease: "power4.in" })
+        .add(() => sound.clap())
         .set(root.current, { backgroundColor: "#39ff14", color: "#0a0a0a" })
         .set(root.current, { backgroundColor: "#0a0a0a", color: "#efebe3" }, "+=0.07")
+        .add(() => sound.whoosh(1.1))
         .add(() => signal("start"), "+=0.12")
         .to(root.current, { clipPath: "inset(0% 0% 100% 0%)", duration: 1.05, ease: "expo.inOut" }, "<");
     };
@@ -147,6 +150,14 @@ export function Loader() {
           <span className="opacity-50">{t.loader.status}</span>
           <span ref={status} className="font-bold">
             {t.loader.lines[0]}
+          </span>
+          <span className="mt-3 flex items-center gap-2 text-acid">
+            <span className="flex h-[10px] items-end gap-[2px]" aria-hidden>
+              {[5, 10, 7, 3].map((h, i) => (
+                <i key={i} className="block w-[2px] bg-current" style={{ height: h }} />
+              ))}
+            </span>
+            {t.sound.hint}
           </span>
         </div>
         <span

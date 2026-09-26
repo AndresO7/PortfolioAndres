@@ -5,6 +5,7 @@ import { sceneIds, type Locale } from "../lib/content";
 import { gsap, ScrollTrigger } from "../lib/gsap";
 import { setLocale, useLocale, useT } from "../lib/i18n";
 import { BEAT_MS, prefersReducedMotion, reel, scrollToSection, when } from "../lib/reel";
+import { sound, useSoundEnabled } from "../lib/sound";
 
 const pad = (n: number, l = 2) => String(Math.floor(n)).padStart(l, "0");
 
@@ -44,6 +45,7 @@ function LangToggle({ locale, onPick, label, tabIndex }: { locale: Locale; onPic
 export function Hud() {
   const t = useT();
   const locale = useLocale();
+  const soundOn = useSoundEnabled();
   /** tl, tr, bl, br — each corner takes the tone of whatever is under it */
   const corners = useRef<(HTMLDivElement | null)[]>([]);
   const timecode = useRef<HTMLSpanElement>(null);
@@ -75,6 +77,7 @@ export function Hud() {
     let lastFpsAt = performance.now();
     let shownFps = 60;
     let lastScene = -1;
+    let lastSceneId = "";
     let lastBeat = -1;
     let sections: HTMLElement[] = [];
     let sectionsAt = 0;
@@ -122,6 +125,9 @@ export function Hud() {
         lastScene = current;
         relabel.current = false;
         const id = sections[current].dataset.scene as (typeof sceneIds)[number];
+        // "work" spans two sections; only a new scene id gets the camcorder beep
+        if (lastSceneId && id !== lastSceneId) sound.scene();
+        lastSceneId = id;
         const idx = sceneIds.indexOf(id);
         if (idx >= 0) {
           if (sceneNum.current) sceneNum.current.textContent = pad(idx + 1);
@@ -152,6 +158,12 @@ export function Hud() {
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, []);
+
+  const openedOnce = useRef(false);
+  useEffect(() => {
+    if (openedOnce.current) sound.whoosh(0.6);
+    openedOnce.current = true;
+  }, [menu]);
 
   useEffect(() => {
     if (!reel.lenis) return;
@@ -196,6 +208,7 @@ export function Hud() {
       return;
     }
     switching.current = true;
+    sound.whoosh(1.1);
     el.querySelector("[data-wipe-code]")!.textContent = next.toUpperCase();
     el.querySelector("[data-wipe-name]")!.textContent = NAMES[next];
     gsap
@@ -293,8 +306,24 @@ export function Hud() {
           data-tone="dark"
         >
           <span className="crop br" style={{ bottom: 20, right: 20 }} />
-          <div className="absolute bottom-[32px] right-[46px] flex items-center gap-6 whitespace-nowrap md:right-[64px] md:gap-10">
-            <span className="mono hidden opacity-60 sm:inline">128 BPM</span>
+          <div className="absolute bottom-[32px] right-[46px] flex items-center gap-5 whitespace-nowrap md:right-[64px] md:gap-10">
+            <button
+              type="button"
+              onClick={() => sound.toggle()}
+              aria-pressed={soundOn}
+              aria-label={t.sound.label}
+              tabIndex={visible ? 0 : -1}
+              className="mono pointer-events-auto flex items-center gap-2 font-bold"
+              data-cursor={soundOn ? t.sound.on : t.sound.off}
+            >
+              <span className="eq flex h-[12px] items-end gap-[2px]" data-on={soundOn ? "1" : "0"} aria-hidden>
+                {[0, 1, 2, 3].map((i) => (
+                  <i key={i} className="block w-[2px] bg-current" style={{ animationDelay: `${i * -0.23}s` }} />
+                ))}
+              </span>
+              <span className="hidden sm:inline">{soundOn ? t.sound.on : t.sound.off}</span>
+            </button>
+            <span className="mono hidden opacity-60 lg:inline">128 BPM</span>
             <span className="flex gap-[5px]">
               {[0, 1, 2, 3].map((i) => (
                 <span
@@ -372,6 +401,10 @@ export function Hud() {
         .hud-c[data-tone="light"] { --hud-fg: var(--color-ink); --hud-inv: var(--color-paper); }
         .lang-menu { --hud-fg: var(--color-ink); --hud-inv: var(--color-acid); }
         .beat[data-on="1"] { background: currentColor; }
+        .eq i { height: 3px; transform-origin: bottom; transition: height .3s; }
+        .eq[data-on="1"] i { height: 12px; animation: eq .47s ease-in-out infinite alternate; }
+        @keyframes eq { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+        @media (prefers-reduced-motion: reduce) { .eq[data-on="1"] i { animation: none; } }
         .lang-btn[aria-pressed="true"] { background: var(--hud-fg); color: var(--hud-inv); }
         .lang-btn[aria-pressed="false"]:hover { opacity: .6; }
       `}</style>
