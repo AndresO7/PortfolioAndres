@@ -2,6 +2,7 @@ import { SmoothScroll } from "./components/SmoothScroll";
 import { Loader } from "./components/Loader";
 import { Hud } from "./components/Hud";
 import { Cursor } from "./components/Cursor";
+import { SoundFx } from "./components/SoundFx";
 import { Hero } from "./components/sections/Hero";
 import { Manifesto } from "./components/sections/Manifesto";
 import { Record } from "./components/sections/Record";
@@ -22,6 +23,7 @@ export default function Home() {
       <Loader />
       <Hud />
       <Cursor />
+      <SoundFx />
       <div className="grain" aria-hidden />
       <main className="relative overflow-x-clip">
         <Hero />

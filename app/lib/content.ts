@@ -122,6 +122,8 @@ const packet = (l: { objective: string; files: string; consumed: string; produce
 const en = {
   lang: { en: "EN", es: "ES", label: "Language", switchTo: "Switch language" },
 
+  sound: { on: "Sound on", off: "Sound off", label: "Sound", hint: "Best with sound — switch it on, bottom right" },
+
   profile: {
     role: "Software Engineer",
     focus: "AI systems · software & cloud architecture",
@@ -613,6 +615,8 @@ export type Content = typeof en;
 
 const es: Content = {
   lang: { en: "EN", es: "ES", label: "Idioma", switchTo: "Cambiar idioma" },
+
+  sound: { on: "Con sonido", off: "Sin sonido", label: "Sonido", hint: "Mejor con sonido — actívalo abajo a la derecha" },
 
   profile: {
     role: "Ingeniero de software",

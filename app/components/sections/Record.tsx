@@ -5,6 +5,7 @@ import { recordValues as records } from "../../lib/content";
 import { useT } from "../../lib/i18n";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { easeInOutCubic, range } from "../../lib/reel";
+import { sound } from "../../lib/sound";
 
 const COLS = 3;
 /** strip order: blank, 0…9 */
@@ -57,6 +58,8 @@ export function Record() {
         const tc = i === 0 ? 1 : easeInOutCubic(range(local, 0.04 * (COLS - 1 - c), 0.27 + 0.04 * (COLS - 1 - c)));
         const pos = from[c] + (to[c] - from[c]) * tc;
         speed = Math.max(speed, Math.abs(pos - last[c]));
+        // a digit passing the window: one mechanical tick
+        if (Math.floor(pos) !== Math.floor(last[c])) sound.tick();
         last[c] = pos;
         const strip = strips.current[c];
         // cells are taller than the window, so a neighbour's overshoot never peeks in

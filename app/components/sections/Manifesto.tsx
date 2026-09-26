@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { useT } from "../../lib/i18n";
 import { reel } from "../../lib/reel";
+import { sound } from "../../lib/sound";
 
 /** one word per third of the scroll, in every language */
 const PHASES = 3;
@@ -35,6 +36,7 @@ export function Manifesto() {
       const f = frame.current;
       if (f) {
         f.dataset.flash = "1";
+        sound.thump();
         window.setTimeout(() => (f.dataset.flash = "0"), 90);
       }
     }

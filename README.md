@@ -45,10 +45,22 @@ renders English and the client swaps before the slate lifts.
 All copy lives in `app/lib/content.ts` as two dictionaries; `es` is typed as
 `typeof en`, so a missing translation fails the build.
 
+## Sound
+
+Every sound is synthesised with Web Audio at runtime — no audio files. It is off
+until the visitor switches it on (bottom right of the HUD); the choice is
+remembered. A low drone opens up with scroll speed, a click track runs on the
+same 128 BPM grid as the HUD squares (a kick joins on the downbeat while you
+scroll), and scenes add one-shots: the slate clap, hover ticks and clicks,
+camcorder beeps between scenes, tape cuts between projects, a thump on each
+kinetic-type word, odometer ticks, the overflow alarm and the language wipe.
+
 ## Layout
 
 - `app/lib/content.ts` — all copy, in English and Spanish
 - `app/lib/i18n.ts` — the language store (`useT()`, `setLocale()`)
+- `app/lib/sound.ts` — the Web Audio engine (`sound.toggle()`, one-shots, the click track)
+- `app/icon.svg`, `favicon.ico`, `apple-icon.png`, `opengraph-image.png` — the viewfinder + REC mark and the share card
 - `app/lib/reel.ts` — shared scroll/pointer state, the beat clock, one-shot signals
 - `app/components/sections/` — one file per scene
 - `app/components/three/` — WebGL: hero, portrait and work canvases, shared dither shaders

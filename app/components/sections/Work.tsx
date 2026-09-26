@@ -6,6 +6,7 @@ import { gsap } from "../../lib/gsap";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { useT } from "../../lib/i18n";
 import { prefersReducedMotion, reel, scrollToSection } from "../../lib/reel";
+import { sound } from "../../lib/sound";
 import { Letters } from "../Letters";
 
 const WorkCanvas = dynamic(() => import("../three/WorkCanvas"), { ssr: false });
@@ -33,6 +34,7 @@ export function Work() {
     if (bar.current) bar.current.style.transform = `scaleY(${p})`;
     if (i !== activeRef.current) {
       activeRef.current = i;
+      sound.cut();
       setActive(i);
     }
   });

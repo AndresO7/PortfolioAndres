@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     description: "AI systems · software & cloud architecture. Quito, Ecuador.",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Andres Ortiz — Systems Reel 2026",
+    description: "AI systems · software & cloud architecture. Quito, Ecuador.",
+  },
 };
 
 export const viewport: Viewport = {

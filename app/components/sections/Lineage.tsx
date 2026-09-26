@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useT } from "../../lib/i18n";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { clamp } from "../../lib/reel";
+import { sound } from "../../lib/sound";
 
 /**
  * Scene 09 — lineage, laid out like an edit timeline: panels slide past a
@@ -35,7 +36,10 @@ export function Lineage() {
           // 0 when the panel's left edge reaches the playhead, 1 once its year has fully crossed it
           const f = clamp((mid - r.left) / (r.width * 0.55));
           p.style.setProperty("--fill", `${(f * 100).toFixed(2)}%`);
-          p.dataset.live = f > 0 && f < 1.4 && r.left < mid && r.right > mid ? "1" : "0";
+          const live = f > 0 && f < 1.4 && r.left < mid && r.right > mid ? "1" : "0";
+          // a panel reaching the playhead is a cut
+          if (live === "1" && p.dataset.live !== "1") sound.cut();
+          p.dataset.live = live;
         });
       }
       raf = requestAnimationFrame(loop);
