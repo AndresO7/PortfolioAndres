@@ -1,42 +1,29 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import { credentials, offers, profile } from "../../lib/content";
+import { identity, type Content } from "../../lib/content";
 import { gsap } from "../../lib/gsap";
 import { useFitText } from "../../lib/hooks";
+import { useT } from "../../lib/i18n";
 import { prefersReducedMotion, scrollToSection } from "../../lib/reel";
 import { Letters } from "../Letters";
 
-const subject = encodeURIComponent("A system worth investigating");
-const QUESTION = ["Have", "a system", "worth", "investigating?"];
-
-const credits = [
-  ["Directed & engineered by", profile.name],
-  ["Role", profile.role],
-  ["Based in", `${profile.base} · ${profile.timezone}`],
-  ["Languages", profile.languages],
-  ...credentials.map((c) => [c.kind, c.label] as const),
-  ["Built with", "Next.js · Three.js · React Three Fiber · GSAP · Lenis"],
-  ["Set in", "Archivo 62–125% · JetBrains Mono"],
-  ["Shot at", "128 BPM · 60 FPS"],
-] as const;
-
-function CopyEmail() {
+function CopyEmail({ hs }: { hs: Content["handshake"] }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
       type="button"
       className="chip h-[44px] gap-3 px-4 transition-colors hover:bg-ink hover:text-acid"
       onClick={() => {
-        navigator.clipboard?.writeText(profile.email).then(() => {
+        navigator.clipboard?.writeText(identity.email).then(() => {
           setCopied(true);
           window.setTimeout(() => setCopied(false), 1600);
         });
       }}
-      data-cursor={copied ? "Copied" : "Copy"}
+      data-cursor={copied ? hs.cursorCopied : hs.copy}
     >
-      <span className="normal-case tracking-[0.04em]">{profile.email}</span>
-      <span className="font-bold">{copied ? "Copied ✓" : "Copy"}</span>
+      <span className="normal-case tracking-[0.04em]">{identity.email}</span>
+      <span className="font-bold">{copied ? hs.copied : hs.copy}</span>
     </button>
   );
 }
@@ -45,7 +32,21 @@ function CopyEmail() {
 export function Handshake() {
   const section = useRef<HTMLElement>(null);
   const fin = useRef<HTMLDivElement>(null);
-  useFitText(fin);
+  const t = useT();
+  const hs = t.handshake;
+  useFitText(fin, 1, undefined, undefined, hs.fin);
+
+  const subject = encodeURIComponent(hs.subject);
+  const credits = [
+    [hs.credits.directed, identity.name],
+    [hs.credits.role, t.profile.role],
+    [hs.credits.based, `${t.profile.base} · ${identity.timezone}`],
+    [hs.credits.languages, t.profile.languages],
+    ...t.credentials.map((c) => [c.kind, c.label]),
+    [hs.credits.built, hs.credits.builtValue],
+    [hs.credits.set, hs.credits.setValue],
+    [hs.credits.shot, hs.credits.shotValue],
+  ];
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -75,7 +76,7 @@ export function Handshake() {
       );
     }, section);
     return () => ctx.revert();
-  }, []);
+  }, [t]);
 
   return (
     <section id="handshake" ref={section} data-scene="handshake" className="relative">
@@ -83,36 +84,33 @@ export function Handshake() {
         <div className="shell">
           <div className="mono mb-6 flex items-center gap-4">
             <span className="bg-ink px-2 py-[2px] font-bold text-acid">11</span>
-            <span className="font-bold">Handshake</span>
-            <span className="opacity-70">— What could you do for your team?</span>
+            <span className="font-bold">{hs.kicker}</span>
+            <span className="opacity-70">{hs.question}</span>
           </div>
 
           <h2 className="hs-q display text-[clamp(56px,11.5vw,210px)] leading-[0.8]">
-            {QUESTION.map((w, i) => (
+            {hs.words.map((w, i) => (
               <Fragment key={w}>
-                <span className={`inline-block overflow-hidden pb-[0.04em] align-top ${i === 3 ? "text-paper [-webkit-text-stroke:2px_#0a0a0a]" : ""}`}>
+                <span className={`inline-block overflow-hidden pb-[0.1em] pt-[0.14em] align-top ${i === 3 ? "text-paper [-webkit-text-stroke:2px_#0a0a0a]" : ""}`}>
                   <span className="inline-block transition-[font-stretch] duration-500 hover:[font-stretch:125%]">
                     <Letters text={w} />
                   </span>
                 </span>
-                {i < QUESTION.length - 1 ? " " : null}
+                {i < hs.words.length - 1 ? " " : null}
               </Fragment>
             ))}
           </h2>
 
-          <p className="lede mt-10 max-w-[44ch]">
-            I’m looking for teams building AI systems that have to work in production — where architecture, cloud and AI
-            can’t be pulled apart. Based in Quito ({profile.timezone}), working in Spanish or English.
-          </p>
+          <p className="lede mt-10 max-w-[44ch]">{hs.lede}</p>
 
           <a
-            href={`mailto:${profile.email}?subject=${subject}`}
+            href={`mailto:${identity.email}?subject=${subject}`}
             className="group relative mt-12 flex items-center justify-between gap-6 overflow-hidden border-2 border-ink bg-ink px-5 py-6 text-paper md:px-8 md:py-8"
-            data-cursor="Write ↗"
+            data-cursor={hs.cursorCta}
           >
             <span className="absolute inset-0 origin-bottom scale-y-0 bg-paper transition-transform duration-500 ease-[cubic-bezier(.77,0,.18,1)] group-hover:scale-y-100" />
             <span className="display relative text-[clamp(34px,6vw,108px)] leading-[0.85] transition-[font-stretch,color] duration-500 group-hover:text-ink group-hover:[font-stretch:110%]">
-              Start a conversation
+              {hs.cta}
             </span>
             <span className="display relative text-[clamp(34px,6vw,108px)] leading-[0.85] text-acid transition-transform duration-500 group-hover:translate-x-2 group-hover:-rotate-45 group-hover:text-volt">
               →
@@ -120,15 +118,15 @@ export function Handshake() {
           </a>
 
           <div className="mt-4 flex flex-wrap gap-3">
-            <CopyEmail />
-            <a href={profile.github} target="_blank" rel="me noopener" className="chip h-[44px] px-4 transition-colors hover:bg-ink hover:text-acid">
-              GitHub · {profile.githubHandle} ↗
+            <CopyEmail hs={hs} />
+            <a href={identity.github} target="_blank" rel="me noopener" className="chip h-[44px] px-4 transition-colors hover:bg-ink hover:text-acid">
+              GitHub · {identity.githubHandle} ↗
             </a>
           </div>
 
           <ol className="hs-offers mt-[10vh] grid gap-8 md:grid-cols-4 md:gap-6">
-            {offers.map((o, i) => (
-              <li key={o.title} className="hs-offer border-t-2 border-ink pt-4">
+            {hs.offers.map((o, i) => (
+              <li key={i} className="hs-offer border-t-2 border-ink pt-4">
                 <span className="mono block font-bold">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="display mt-5 text-[clamp(26px,2.3vw,38px)] leading-[0.9]">{o.title}</h3>
                 <p className="mt-3 text-[15px] leading-snug">{o.body}</p>
@@ -140,7 +138,7 @@ export function Handshake() {
 
       <footer data-tone="dark" className="relative bg-ink pb-[120px] pt-[14vh] text-paper">
         <div className="shell">
-          <p className="mono mb-10 text-center font-bold text-acid">End credits</p>
+          <p className="mono mb-10 text-center font-bold text-acid">{hs.creditsTitle}</p>
           <dl className="mx-auto max-w-[900px]">
             {credits.map(([k, v], i) => (
               <div key={i} className="credit grid grid-cols-2 items-baseline gap-6 py-2">
@@ -153,19 +151,19 @@ export function Handshake() {
           <div className="relative mt-[14vh] overflow-hidden">
             <div ref={fin} className="display relative inline-block whitespace-nowrap leading-[0.78]">
               <span className="outline block" style={{ ["--stroke-color" as string]: "#39ff14", ["--stroke" as string]: "2px" }}>
-                Fin.
+                {hs.fin}
               </span>
               <span className="fin-fill absolute inset-0 block text-acid" aria-hidden>
-                Fin.
+                {hs.fin}
               </span>
             </div>
           </div>
 
           <div className="mono mt-8 flex flex-wrap items-center justify-between gap-4 border-t-2 border-paper/25 pt-5">
-            <span>© {new Date().getFullYear()} {profile.name}</span>
-            <span className="opacity-60">End of reel — thanks for watching</span>
-            <button type="button" className="font-bold hover:text-acid" onClick={() => scrollToSection("title")} data-cursor="Rewind">
-              ↑ Rewind to 00:00
+            <span>© {new Date().getFullYear()} {identity.name}</span>
+            <span className="opacity-60">{hs.end}</span>
+            <button type="button" className="font-bold hover:text-acid" onClick={() => scrollToSection("title")} data-cursor={hs.cursorRewind}>
+              {hs.rewind}
             </button>
           </div>
         </div>

@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useT } from "../lib/i18n";
 
 /** A difference-blended square that turns into a label over anything clickable. */
 export function Cursor() {
   const root = useRef<HTMLDivElement>(null);
   const label = useRef<HTMLSpanElement>(null);
+  const t = useT();
+  const fallback = useRef(t.hud.cursorOpen);
+  useEffect(() => {
+    fallback.current = t.hud.cursorOpen;
+  }, [t]);
 
   useEffect(() => {
     if (!window.matchMedia("(pointer: fine)").matches) return;
@@ -30,7 +36,7 @@ export function Cursor() {
         el.style.opacity = "1";
       }
       const target = (e.target as Element | null)?.closest?.("a, button, [data-cursor]");
-      const text = target ? target.getAttribute("data-cursor") ?? "Open" : "";
+      const text = target ? target.getAttribute("data-cursor") ?? fallback.current : "";
       if (label.current && label.current.textContent !== text) label.current.textContent = text;
       el.dataset.active = target ? "1" : "0";
     };

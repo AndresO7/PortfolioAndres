@@ -155,6 +155,7 @@ function TextRing({
     document.fonts?.load(`700 64px "JetBrains Mono Variable"`).then(draw).catch(() => {});
     return tex;
   }, [text, radius, height]);
+  useEffect(() => () => texture.dispose(), [texture]);
 
   const [frontMat, backMat] = useMemo(() => {
     const common = { map: texture, transparent: true, depthWrite: false, toneMapped: false };
@@ -163,6 +164,14 @@ function TextRing({
       new THREE.MeshBasicMaterial({ ...common, side: THREE.BackSide, color: back, opacity: 0.55 }),
     ];
   }, [texture, front, back]);
+
+  useEffect(
+    () => () => {
+      frontMat.dispose();
+      backMat.dispose();
+    },
+    [frontMat, backMat],
+  );
 
   useEffect(() => when("start", () => (started.current = performance.now())), []);
 
@@ -205,7 +214,16 @@ function Rig({ progress }: { progress: RefObject<number> }) {
   return null;
 }
 
-export default function HeroCanvas({ progress, active }: { progress: RefObject<number>; active: boolean }) {
+export default function HeroCanvas({
+  progress,
+  active,
+  rings,
+}: {
+  progress: RefObject<number>;
+  active: boolean;
+  /** the two ring captions, in the page's language */
+  rings: string[];
+}) {
   return (
     <Canvas
       dpr={[1, 2]}
@@ -218,7 +236,7 @@ export default function HeroCanvas({ progress, active }: { progress: RefObject<n
         <Statue progress={progress} />
       </Suspense>
       <TextRing
-        text="SOFTWARE ENGINEER — AI SYSTEMS — CLOUD ARCHITECTURE — QUITO, EC — "
+        text={rings[0]}
         radius={1.55}
         height={0.2}
         y={0.55}
@@ -229,7 +247,7 @@ export default function HeroCanvas({ progress, active }: { progress: RefObject<n
         progress={progress}
       />
       <TextRing
-        text="SYSTEMS, NOT DEMOS + REEL 2026 + 128 BPM + "
+        text={rings[1]}
         radius={1.9}
         height={0.16}
         y={-0.75}

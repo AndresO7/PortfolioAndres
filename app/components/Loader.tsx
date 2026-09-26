@@ -2,15 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "../lib/gsap";
+import { useT } from "../lib/i18n";
 import { signal, when } from "../lib/reel";
-
-const statusLines = [
-  "Mounting statue.glb — 87,547 tris",
-  "Compiling dither shader",
-  "Setting type — Archivo 62% ↔ 125%",
-  "Syncing clock — 128 BPM",
-  "Rolling",
-];
 
 /**
  * Scene 00: a film slate. Counts to 100 while the statue and fonts load,
@@ -24,6 +17,11 @@ export function Loader() {
   const status = useRef<HTMLSpanElement>(null);
   const date = useRef<HTMLSpanElement>(null);
   const [done, setDone] = useState(false);
+  const t = useT();
+  const lines = useRef(t.loader.lines);
+  useEffect(() => {
+    lines.current = t.loader.lines;
+  }, [t]);
 
   useEffect(() => {
     const d = new Date();
@@ -63,7 +61,8 @@ export function Loader() {
       if (counter.current) counter.current.textContent = String(n).padStart(3, "0");
       if (bar.current) bar.current.style.transform = `scaleX(${display / 100})`;
       if (status.current) {
-        const line = statusLines[Math.min(statusLines.length - 1, Math.floor((display / 100) * statusLines.length))];
+        const all = lines.current;
+        const line = all[Math.min(all.length - 1, Math.floor((display / 100) * all.length))];
         if (status.current.textContent !== line) status.current.textContent = line;
       }
       if (n >= 100 && !finishing) {
@@ -92,7 +91,7 @@ export function Loader() {
       className="fixed inset-0 z-[110] flex flex-col bg-ink text-paper"
       style={{ clipPath: "inset(0% 0% 0% 0%)" }}
       role="status"
-      aria-label="Loading"
+      aria-label={t.loader.aria}
     >
       <div className="shell pt-[26px]">
         {/* clapper sticks */}
@@ -118,24 +117,24 @@ export function Loader() {
         {/* slate */}
         <div className="mono mt-3 grid grid-cols-3 border-2 border-paper/90 border-t-0 md:grid-cols-6">
           <div className={`${cell} col-span-3 md:col-span-4`}>
-            <span className="block opacity-50">Prod.</span>
-            <span className="block font-bold">Andres Ortiz — Systems reel</span>
+            <span className="block opacity-50">{t.loader.prod}</span>
+            <span className="block font-bold">{t.loader.prodValue}</span>
           </div>
           <div className={`${cell} col-span-3 border-l-0 md:col-span-2 md:border-l-2`}>
-            <span className="block opacity-50">Director</span>
+            <span className="block opacity-50">{t.loader.director}</span>
             <span className="block font-bold">A. Ortiz</span>
           </div>
           {[
-            ["Roll", "01"],
-            ["Scene", "00"],
-            ["Take", "26"],
-            ["Camera", "A"],
-            ["FPS", "60"],
-            ["Date", "----.--.--"],
+            [t.loader.roll, "01"],
+            [t.loader.scene, "00"],
+            [t.loader.take, "26"],
+            [t.loader.camera, "A"],
+            [t.loader.fps, "60"],
+            [t.loader.date, "----.--.--"],
           ].map(([k, v], i) => (
-            <div key={k} className={`${cell} ${i % 3 === 0 ? "" : "border-l-2"} ${i === 3 ? "md:border-l-2" : ""}`}>
+            <div key={i} className={`${cell} ${i % 3 === 0 ? "" : "border-l-2"} ${i === 3 ? "md:border-l-2" : ""}`}>
               <span className="block opacity-50">{k}</span>
-              <span ref={k === "Date" ? date : undefined} className="block font-bold tabular-nums">
+              <span ref={i === 5 ? date : undefined} className="block font-bold tabular-nums">
                 {v}
               </span>
             </div>
@@ -145,9 +144,9 @@ export function Loader() {
 
       <div className="shell relative mt-auto flex items-end justify-between gap-6 pb-[26px]">
         <div className="mono mb-3 flex max-w-[46%] flex-col gap-1">
-          <span className="opacity-50">Status</span>
+          <span className="opacity-50">{t.loader.status}</span>
           <span ref={status} className="font-bold">
-            {statusLines[0]}
+            {t.loader.lines[0]}
           </span>
         </div>
         <span

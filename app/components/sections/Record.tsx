@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { records } from "../../lib/content";
+import { recordValues as records } from "../../lib/content";
+import { useT } from "../../lib/i18n";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { easeInOutCubic, range } from "../../lib/reel";
 
@@ -29,6 +30,7 @@ export function Record() {
   const [active, setActive] = useState(0);
   const activeRef = useRef(0);
   const inView = useInView(section, "100px");
+  const t = useT();
 
   const progress = usePinProgress(section, (p) => {
     const i = Math.min(records.length - 1, Math.floor(p * records.length));
@@ -77,6 +79,7 @@ export function Record() {
   }, [inView, progress]);
 
   const rec = records[active];
+  const fact = t.record.facts[active];
 
   return (
     <section
@@ -96,12 +99,12 @@ export function Record() {
       <div className="sticky top-0 flex h-[100svh] flex-col overflow-hidden">
         <div className="shell flex items-start justify-between gap-6 pt-[100px] md:pt-[104px]">
           <div className="mono flex max-w-[40ch] flex-col gap-1">
-            <span className="font-bold">The record</span>
-            <span className="opacity-60">Every number here was taken from a real repository.</span>
+            <span className="font-bold">{t.record.title}</span>
+            <span className="opacity-60">{t.record.sub}</span>
           </div>
           <div className="mono text-right">
             <span className="block font-bold tabular-nums">
-              Fact {String(active + 1).padStart(2, "0")}/{String(records.length).padStart(2, "0")}
+              {t.record.fact} {String(active + 1).padStart(2, "0")}/{String(records.length).padStart(2, "0")}
             </span>
             <span className="block opacity-60">{rec.asOf}</span>
           </div>
@@ -142,7 +145,7 @@ export function Record() {
           </div>
           <p className="sr-only">
             {rec.value}
-            {rec.unit} {rec.fact}
+            {rec.unit} {fact}
           </p>
           <ol className="absolute right-[var(--gutter)] top-1/2 hidden -translate-y-1/2 flex-col md:flex" aria-hidden>
             {records.map((r, i) => (
@@ -164,13 +167,13 @@ export function Record() {
         </div>
 
         <div className="shell grid gap-4 pb-[104px] md:grid-cols-12 md:gap-8 md:pb-[112px]">
-          <p key={active} className="lede record-fact md:col-span-8" aria-live="polite">
+          <p key={fact} className="lede record-fact md:col-span-8" aria-live="polite">
             {rec.unit === "B" ? "~" : ""}
             {rec.value}
-            {rec.unit === "B" ? " bytes" : rec.unit} — {rec.fact}.
+            {rec.unit === "B" ? t.record.bytes : rec.unit} — {fact}.
           </p>
           <div className="mono flex flex-col justify-end gap-1 md:col-span-4 md:text-right">
-            <span className="opacity-60">Source</span>
+            <span className="opacity-60">{t.record.source}</span>
             <span className="font-bold">{rec.source}</span>
           </div>
         </div>

@@ -57,6 +57,8 @@ export function useFitText<T extends HTMLElement>(
   ratio = 1,
   measure?: RefObject<HTMLElement | null>,
   maxFontSize?: () => number,
+  /** the text itself: a new value (e.g. a new language) forces a refit */
+  text?: string,
 ) {
   const max = useRef(maxFontSize);
   useEffect(() => {
@@ -90,5 +92,5 @@ export function useFitText<T extends HTMLElement>(
       ro.disconnect();
       window.removeEventListener("resize", onResize);
     };
-  }, [ref, ratio, measure]);
+  }, [ref, ratio, measure, text]);
 }

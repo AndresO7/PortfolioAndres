@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { lineage } from "../../lib/content";
+import { useT } from "../../lib/i18n";
 import { useInView, usePinProgress } from "../../lib/hooks";
 import { clamp } from "../../lib/reel";
 
@@ -16,6 +16,8 @@ export function Lineage() {
   const panels = useRef<HTMLElement[]>([]);
   const inView = useInView(section, "100px");
   const progress = usePinProgress(section);
+  const t = useT();
+  const lineage = t.lineage.items;
 
   useEffect(() => {
     if (!inView) return;
@@ -54,10 +56,10 @@ export function Lineage() {
       <div className="sticky top-0 h-[100svh] overflow-hidden">
         <div className="shell absolute inset-x-0 top-[100px] flex items-start justify-between gap-6 md:top-[104px]">
           <div className="mono flex flex-col gap-1">
-            <span className="font-bold text-acid">Lineage</span>
-            <span className="opacity-60">From the model writing code to agents as a workforce.</span>
+            <span className="font-bold text-acid">{t.lineage.title}</span>
+            <span className="opacity-60">{t.lineage.sub}</span>
           </div>
-          <span className="mono hidden font-bold md:block">Timeline — 2023 → 2026</span>
+          <span className="mono hidden font-bold md:block">{t.lineage.timeline}</span>
         </div>
 
         <div ref={track} className="absolute inset-y-0 left-0 flex items-center will-change-transform">
@@ -74,7 +76,11 @@ export function Lineage() {
               <span className="mono mb-4 opacity-60">
                 {String(i + 1).padStart(2, "0")} / {String(lineage.length).padStart(2, "0")}
               </span>
-              <span className="lineage-year display relative block leading-[0.78]" style={{ fontSize: "min(46svh, 34vw)" }}>
+              <span
+                className="lineage-year display relative block leading-[0.78]"
+                // four characters fill the panel; longer words ("LUEGO") scale down to fit
+                style={{ fontSize: `calc(min(46svh, 34vw) * ${Math.min(1, 4 / l.year.length)})` }}
+              >
                 <span className="outline block" style={{ ["--stroke-color" as string]: "#39ff14", ["--stroke" as string]: "2px" }}>
                   {l.year}
                 </span>
@@ -105,7 +111,7 @@ export function Lineage() {
         </div>
         <div className="absolute bottom-[92px] left-1/2 top-[160px] w-[2px] -translate-x-1/2 bg-signal" aria-hidden>
           <span className="mono absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-signal px-2 py-[2px] text-paper">
-            Playhead
+            {t.lineage.playhead}
           </span>
         </div>
       </div>

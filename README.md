@@ -34,9 +34,21 @@ and JetBrains Mono, self-hosted through Fontsource.
 | 10 | Harness | RFC-style task packet typed out on scroll |
 | 11 | Handshake | Contact, then end credits and "Fin." |
 
+## Languages
+
+English and Spanish. The EN / ES switch sits in the top-right of the HUD (and in
+the scene index); it cuts over behind an acid wipe and keeps you at the same
+point of the same scene. A visitor's choice is remembered in `localStorage`; on a
+first visit, Spanish-language browsers start in Spanish. The server always
+renders English and the client swaps before the slate lifts.
+
+All copy lives in `app/lib/content.ts` as two dictionaries; `es` is typed as
+`typeof en`, so a missing translation fails the build.
+
 ## Layout
 
-- `app/lib/content.ts` — all copy in one place
+- `app/lib/content.ts` — all copy, in English and Spanish
+- `app/lib/i18n.ts` — the language store (`useT()`, `setLocale()`)
 - `app/lib/reel.ts` — shared scroll/pointer state, the beat clock, one-shot signals
 - `app/components/sections/` — one file per scene
 - `app/components/three/` — WebGL: hero, portrait and work canvases, shared dither shaders

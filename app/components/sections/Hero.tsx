@@ -4,7 +4,8 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef } from "react";
 import { gsap } from "../../lib/gsap";
 import { useFitText, useInView, usePinProgress } from "../../lib/hooks";
-import { profile } from "../../lib/content";
+import { identity } from "../../lib/content";
+import { useT } from "../../lib/i18n";
 import { prefersReducedMotion, reel, when } from "../../lib/reel";
 import { Letters } from "../Letters";
 
@@ -20,6 +21,8 @@ export function Hero() {
   const meta = useRef<HTMLDivElement>(null);
   const progress = usePinProgress(section);
   const inView = useInView(section, "0px");
+  const t = useT();
+  const profile = { ...identity, ...t.profile };
 
   // Both rows fill the width, but never so tall that they collide around the statue.
   const maxRow = () => (window.innerHeight - 200 - window.innerHeight * 0.14) / 1.6;
@@ -94,7 +97,7 @@ export function Hero() {
         </div>
 
         <div className="absolute inset-0">
-          <HeroCanvas progress={progress} active={inView} />
+          <HeroCanvas progress={progress} active={inView} rings={t.hero.rings} />
         </div>
 
         <div

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { contextSteps, contextTask, WINDOW } from "../../lib/content";
+import { contextTokens as contextSteps, WINDOW } from "../../lib/content";
 import { useInView, usePinProgress } from "../../lib/hooks";
+import { useLocale, useT } from "../../lib/i18n";
 import { easeOutExpo, range } from "../../lib/reel";
 
 /** The bar track represents this many tokens, so the 200k window sits short of the edge. */
@@ -18,7 +19,8 @@ const cumulative = (key: "direct" | "firewall") => {
 };
 const startsDirect = cumulative("direct");
 const startsFirewall = cumulative("firewall");
-const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
+/** 206,950 in English, 206.950 in Spanish */
+const fmt = (n: number, locale = "en-US") => Math.round(n).toLocaleString(locale);
 
 /**
  * Scene 07 — context. One agent task run twice as you scroll: tools wired
@@ -36,6 +38,13 @@ export function Context() {
   const [step, setStep] = useState(0);
   const stepRef = useRef(0);
   const inView = useInView(section, "100px");
+  const t = useT();
+  const c = t.context;
+  const numbers = useLocale() === "es" ? "es-EC" : "en-US";
+  const numbersRef = useRef(numbers);
+  useEffect(() => {
+    numbersRef.current = numbers;
+  }, [numbers]);
 
   const progress = usePinProgress(section, (p) => {
     const s = Math.min(contextSteps.length - 1, Math.floor(p * contextSteps.length));
@@ -67,8 +76,8 @@ export function Context() {
           w.style.width = `${((s.firewall * f) / TRACK) * 100}%`;
         }
       });
-      if (countD.current) countD.current.textContent = fmt(direct);
-      if (countF.current) countF.current.textContent = fmt(firewall);
+      if (countD.current) countD.current.textContent = fmt(direct, numbersRef.current);
+      if (countF.current) countF.current.textContent = fmt(firewall, numbersRef.current);
       const over = Math.max(0, direct - WINDOW);
       if (overflow.current) overflow.current.style.width = `${(over / TRACK) * 100}%`;
       if (alarm.current) alarm.current.dataset.on = over > 0 ? "1" : "0";
@@ -79,7 +88,7 @@ export function Context() {
   }, [inView, progress]);
 
   const windowAt = `${(WINDOW / TRACK) * 100}%`;
-  const current = contextSteps[step];
+  const current = c.steps[step];
 
   return (
     <section
@@ -94,30 +103,32 @@ export function Context() {
         <div className="mono flex items-start justify-between gap-6">
           <div className="flex items-center gap-4">
             <span className="bg-acid px-2 py-[2px] font-bold text-ink">07</span>
-            <span className="font-bold">Context</span>
-            <span className="hidden opacity-60 sm:inline">— Do you understand AI beyond an API call?</span>
+            <span className="font-bold">{c.kicker}</span>
+            <span className="hidden opacity-60 sm:inline">{c.question}</span>
           </div>
-          <span className="hidden font-bold md:inline">Window · {fmt(WINDOW)} tokens</span>
+          <span className="hidden whitespace-nowrap font-bold md:inline">
+            {c.window} · {fmt(WINDOW, numbers)} tokens
+          </span>
         </div>
 
         <h2 className="display mt-5 text-[clamp(44px,7.4vw,128px)] leading-[0.82]">
-          Context is <span className="text-acid">the resource</span>
+          {c.titleA} <span className="text-acid">{c.titleB}</span>
         </h2>
         <p className="lede mt-4 max-w-[46ch] text-paper/80">
-          <span className="mono mr-3 align-middle text-acid">Task</span>“{contextTask}”
+          <span className="mono mr-3 align-middle text-acid">{c.taskLabel}</span>“{c.task}”
         </p>
 
         <div className="relative mt-auto">
           {[
-            { key: "d", label: "Direct — 12 MCP servers, 96 tools, 6 skills", count: countD, segs: segD, tone: "direct" },
-            { key: "f", label: "Through Quipu — the surface this identity may see", count: countF, segs: segF, tone: "firewall" },
+            { key: "d", label: c.direct, count: countD, segs: segD, tone: "direct" },
+            { key: "f", label: c.firewall, count: countF, segs: segF, tone: "firewall" },
           ].map((row) => (
             <div key={row.key} className="mb-6 last:mb-0">
               <div className="mb-2 flex items-end justify-between gap-4">
                 <span className="mono max-w-[60%] opacity-80">{row.label}</span>
                 <span className="display text-[clamp(30px,3.6vw,60px)] leading-[0.85] tabular-nums">
                   <span ref={row.count}>0</span>
-                  <span className="mono ml-2 align-top opacity-60">tok</span>
+                  <span className="mono ml-2 align-top opacity-60">{c.tok}</span>
                 </span>
               </div>
               <div className="relative h-[clamp(34px,6vh,64px)] overflow-hidden border-2 border-paper/40">
@@ -145,8 +156,8 @@ export function Context() {
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-12 md:gap-8">
-          <ol className="mono flex flex-wrap gap-1 md:col-span-7" aria-label="Agent loop">
-            {contextSteps.map((s, i) => (
+          <ol className="mono flex flex-wrap gap-1 md:col-span-7" aria-label={c.loop}>
+            {c.steps.map((s, i) => (
               <li
                 key={i}
                 className={`border-[1.5px] px-2 py-1 transition-colors duration-300 ${
@@ -159,9 +170,9 @@ export function Context() {
           </ol>
           <div className="md:col-span-5">
             <span ref={alarm} className="ctx-alarm mono mb-2 inline-block bg-signal px-2 py-[2px] font-bold text-paper" data-on="0">
-              Overflow — the harness compacts
+              {c.overflow}
             </span>
-            <p key={step} className="ctx-note text-[15px] leading-snug text-paper/85 md:text-[16px]">
+            <p key={current.note} className="ctx-note text-[15px] leading-snug text-paper/85 md:text-[16px]">
               {current.note}
             </p>
           </div>

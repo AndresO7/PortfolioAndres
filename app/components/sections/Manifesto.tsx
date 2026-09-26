@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useInView, usePinProgress } from "../../lib/hooks";
+import { useT } from "../../lib/i18n";
 import { reel } from "../../lib/reel";
 
-const WORDS = ["SYSTEMS", "NOT", "DEMOS"] as const;
+/** one word per third of the scroll, in every language */
+const PHASES = 3;
 const ROWS = 7;
 const CENTER = 3;
 
@@ -21,10 +23,12 @@ export function Manifesto() {
   const counter = useRef<HTMLSpanElement>(null);
   const [phase, setPhase] = useState(0);
   const phaseRef = useRef(0);
+  const lineRef = useRef("");
   const inView = useInView(section, "100px");
+  const t = useT();
 
   const progress = usePinProgress(section, (p) => {
-    const next = Math.min(WORDS.length - 1, Math.floor(p * WORDS.length * 0.999));
+    const next = Math.min(PHASES - 1, Math.floor(p * PHASES * 0.999));
     if (next !== phaseRef.current) {
       phaseRef.current = next;
       setPhase(next);
@@ -41,12 +45,13 @@ export function Manifesto() {
     let raf = 0;
     let smoothV = 0;
     const widths: number[] = [];
-    let measuredFor = -1;
+    let measuredFor = "";
     const t0 = performance.now();
     const loop = (now: number) => {
-      if (measuredFor !== phaseRef.current) {
+      // re-measure the loop width whenever the word (or the language) changes
+      if (measuredFor !== lineRef.current) {
         rows.current.forEach((r, i) => (widths[i] = (r.firstElementChild as HTMLElement)?.offsetWidth ?? 1));
-        measuredFor = phaseRef.current;
+        measuredFor = lineRef.current;
       }
       const p = progress.current;
       smoothV += (reel.velocity - smoothV) * 0.15;
@@ -63,16 +68,19 @@ export function Manifesto() {
       const b = Math.min(14, Math.abs(v) * 0.45);
       blur.current?.setAttribute("stdDeviation", `${b.toFixed(1)} 0`);
       if (frame.current) frame.current.style.setProperty("--mblur", b > 0.6 ? "url(#manifesto-blur)" : "none");
-      if (counter.current) counter.current.textContent = `${String(phaseRef.current + 1).padStart(2, "0")}/${String(WORDS.length).padStart(2, "0")}`;
+      if (counter.current) counter.current.textContent = `${String(phaseRef.current + 1).padStart(2, "0")}/${String(PHASES).padStart(2, "0")}`;
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [inView, progress]);
 
-  const word = WORDS[phase];
+  const word = t.manifesto.words[phase];
   const repeat = Math.max(3, Math.ceil(14 / word.length));
   const line = Array.from({ length: repeat }, () => word).join(" ") + " ";
+  useEffect(() => {
+    lineRef.current = line;
+  }, [line]);
 
   return (
     <section
@@ -81,7 +89,7 @@ export function Manifesto() {
       data-scene="manifesto"
       data-tone="light"
       className="relative h-[330vh] bg-acid text-ink"
-      aria-label="Systems, not demos"
+      aria-label={t.manifesto.sr}
     >
       <svg className="absolute h-0 w-0" aria-hidden>
         <filter id="manifesto-blur" x="-10%" y="0" width="120%" height="100%">
@@ -90,7 +98,7 @@ export function Manifesto() {
       </svg>
 
       <div ref={frame} className="manifesto-frame sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden" data-flash="0">
-        <p className="sr-only">Systems, not demos.</p>
+        <p className="sr-only">{t.manifesto.sr}</p>
         <div aria-hidden className="flex flex-col" style={{ filter: "var(--mblur)" }}>
           {Array.from({ length: ROWS }, (_, i) => {
             const d = Math.abs(i - CENTER);
@@ -113,12 +121,9 @@ export function Manifesto() {
         </div>
 
         <div className="shell pointer-events-none absolute inset-x-0 bottom-[104px] flex items-end justify-between gap-6 md:bottom-[110px]">
-          <p className="mono max-w-[46ch] bg-acid py-1 font-bold">
-            Agents, MCP servers and gateways, tool governance, context budgets, evaluation that can fail — designed as
-            systems, not demos.
-          </p>
-          <span className="mono bg-acid py-1 font-bold">
-            Word <span ref={counter}>01/03</span>
+          <p className="mono max-w-[46ch] bg-acid py-1 font-bold">{t.manifesto.caption}</p>
+          <span className="mono whitespace-nowrap bg-acid py-1 font-bold">
+            {t.manifesto.word} <span ref={counter}>01/03</span>
           </span>
         </div>
       </div>
