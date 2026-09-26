@@ -49,8 +49,7 @@ All copy lives in `app/lib/content.ts` as two dictionaries; `es` is typed as
 
 Every sound is synthesised with Web Audio at runtime — no audio files. It is off
 until the visitor switches it on (bottom right of the HUD); the choice is
-remembered. A low drone opens up with scroll speed, a click track runs on the
-same 128 BPM grid as the HUD squares (a kick joins on the downbeat while you
+remembered. A click track runs on the same 128 BPM grid as the HUD squares (a kick joins on the downbeat while you
 scroll), and scenes add one-shots: the slate clap, hover ticks and clicks,
 camcorder beeps between scenes, tape cuts between projects, a thump on each
 kinetic-type word, odometer ticks, the overflow alarm and the language wipe.

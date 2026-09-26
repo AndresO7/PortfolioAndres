@@ -8,7 +8,6 @@ import { BEAT_MS, reel } from "./reel";
  * there are no audio files to download. Off until the visitor turns it on;
  * browsers only let audio start after a click, tap or key press anyway.
  *
- * - a low drone whose filter opens with scroll speed
  * - a click track on the same 128 BPM grid as the HUD squares (hats always,
  *   a kick on the downbeat while you scroll)
  * - one-shots for UI and scene events: hover ticks, clicks, camcorder beeps,
@@ -24,8 +23,6 @@ class SoundEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private sfx: GainNode | null = null;
-  private droneFilter: BiquadFilterNode | null = null;
-  private droneGain: GainNode | null = null;
   private noise: AudioBuffer | null = null;
   private scheduler = 0;
   private lastBeat = -1;
@@ -126,31 +123,6 @@ class SoundEngine {
     const data = buffer.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
     this.noise = buffer;
-
-    // drone: detuned low oscillators through a resonant low-pass
-    this.droneFilter = ctx.createBiquadFilter();
-    this.droneFilter.type = "lowpass";
-    this.droneFilter.frequency.value = 160;
-    this.droneFilter.Q.value = 7;
-    this.droneGain = ctx.createGain();
-    this.droneGain.gain.value = 0.05;
-    this.droneFilter.connect(this.droneGain).connect(this.master);
-    (
-      [
-        ["sawtooth", 55, 0.5],
-        ["sawtooth", 55.35, 0.5],
-        ["triangle", 82.4, 0.7],
-        ["sine", 110, 0.35],
-      ] as const
-    ).forEach(([type, freq, level]) => {
-      const osc = ctx.createOscillator();
-      osc.type = type;
-      osc.frequency.value = freq;
-      const g = ctx.createGain();
-      g.gain.value = level;
-      osc.connect(g).connect(this.droneFilter!);
-      osc.start();
-    });
   }
 
   private live() {
@@ -163,15 +135,6 @@ class SoundEngine {
     if (now - (this.last[kind] ?? 0) < ms) return false;
     this.last[kind] = now;
     return true;
-  }
-
-  /** Scroll speed opens the drone's filter and lifts it a little. Call once per frame. */
-  setVelocity(v: number) {
-    if (!this.live() || !this.droneFilter || !this.droneGain) return;
-    const t = this.ctx!.currentTime;
-    const k = Math.min(1, Math.abs(v) / 45);
-    this.droneFilter.frequency.setTargetAtTime(160 + k * 1600, t, 0.12);
-    this.droneGain.gain.setTargetAtTime(0.05 + k * 0.05, t, 0.2);
   }
 
   /** The click track: schedules the next beats of the shared 128 BPM grid slightly ahead. */
