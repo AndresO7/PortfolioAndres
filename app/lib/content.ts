@@ -341,7 +341,6 @@ const en = {
       },
     ] as Project[],
     also: [
-      { name: "KODA", note: "Multi-agent orchestration for DevOps workflows", stack: "LangGraph · A2A · MCP" },
       { name: "Cloud Bot", note: "Natural-language automation of AWS deployments", stack: "Go · Kafka" },
       { name: "Pico y Placa", note: "Quito’s driving-restriction rules as a tested library", stack: "TypeScript · Jest" },
       { name: "PetShop", note: "Technical test on the PetStore API", stack: "Next.js 15 · React 19 · Zustand" },
@@ -513,11 +512,6 @@ const en = {
         year: "2024",
         title: "The model operates infrastructure",
         body: "Quasar: a local Llama 3 8B writes Terraform for AWS, treats apply errors as observations and loops until it works.",
-      },
-      {
-        year: "THEN",
-        title: "Agents coordinate",
-        body: "KODA: multi-agent DevOps workflows with LangGraph, A2A and MCP — and research on cache-augmented generation.",
       },
       {
         year: "2026",
@@ -834,7 +828,6 @@ const es: Content = {
       },
     ],
     also: [
-      { name: "KODA", note: "Orquestación multiagente para flujos DevOps", stack: "LangGraph · A2A · MCP" },
       { name: "Cloud Bot", note: "Despliegues en AWS automatizados con lenguaje natural", stack: "Go · Kafka" },
       { name: "Pico y Placa", note: "Las reglas de restricción vehicular de Quito como librería testeada", stack: "TypeScript · Jest" },
       { name: "PetShop", note: "Prueba técnica sobre la API de PetStore", stack: "Next.js 15 · React 19 · Zustand" },
@@ -1006,11 +999,6 @@ const es: Content = {
         year: "2024",
         title: "El modelo opera infraestructura",
         body: "Quasar: un Llama 3 8B local escribe Terraform para AWS, trata los errores del apply como observaciones y repite hasta que funciona.",
-      },
-      {
-        year: "LUEGO",
-        title: "Los agentes se coordinan",
-        body: "KODA: flujos DevOps multiagente con LangGraph, A2A y MCP — e investigación en generación aumentada por caché.",
       },
       {
         year: "2026",
